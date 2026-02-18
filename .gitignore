@@ -1,25 +1,9 @@
 # Dependencias
 node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
 
 # Datos y Temporales
 data/*.lock
 *.log
-
-# IDEs y Editores
-.vscode/
-.idea/
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
-# Sistema
-.DS_Store
-Thumbs.db
 
 # Otros
 Link GitHub.txt
