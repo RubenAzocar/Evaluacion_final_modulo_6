@@ -4,9 +4,9 @@ const fs = require('fs').promises;
 const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PUERTO = process.env.PORT || 3000;
 
-const DATA_PATH = path.join(__dirname, 'data', 'pets.json');
+const RUTA_DATOS = path.join(__dirname, 'data', 'pets.json');
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -21,24 +21,24 @@ app.use((req, res, next) => {
   next();
 });
 
-// Helper: leer datos
-async function readData() {
+// Ayudante: leer datos
+async function leerDatos() {
   try {
-    const content = await fs.readFile(DATA_PATH, 'utf8');
-    return JSON.parse(content || '[]');
+    const contenido = await fs.readFile(RUTA_DATOS, 'utf8');
+    return JSON.parse(contenido || '[]');
   } catch (err) {
     if (err.code === 'ENOENT') return [];
     throw err;
   }
 }
 
-// Helper: escribir datos
-async function writeData(data) {
-  await fs.writeFile(DATA_PATH, JSON.stringify(data, null, 2), 'utf8');
+// Ayudante: escribir datos
+async function escribirDatos(datos) {
+  await fs.writeFile(RUTA_DATOS, JSON.stringify(datos, null, 2), 'utf8');
 }
 
-// Helper: Validar RUT chileno (módulo 11)
-function validateRut(rut) {
+// Ayudante: Validar RUT chileno (módulo 11)
+function validarRut(rut) {
   if (!rut || typeof rut !== 'string') return false;
   let sRut = rut.replace(/\./g, '').replace(/-/g, '').toUpperCase();
   if (sRut.length < 8) return false;
@@ -60,120 +60,120 @@ function validateRut(rut) {
   return dvCalc === dv;
 }
 
-// Helper: Clasificar especie
-function classifySpecies(species) {
-  const known = ['PERRO', 'GATO', 'CONEJO', 'HAMSTER', 'PAJARO', 'PÁJARO'];
-  const s = String(species).trim().toUpperCase();
-  return known.includes(s) ? s.charAt(0) + s.slice(1).toLowerCase() : 'Animal Exótico';
+// Ayudante: Clasificar especie
+function clasificarEspecie(especie) {
+  const conocidas = ['PERRO', 'GATO', 'CONEJO', 'HAMSTER', 'PAJARO', 'PÁJARO'];
+  const s = String(especie).trim().toUpperCase();
+  return conocidas.includes(s) ? s.charAt(0) + s.slice(1).toLowerCase() : 'Animal Exótico';
 }
 
 // GET /api/pets
 app.get('/api/pets', async (req, res) => {
   try {
-    const { name, rut } = req.query;
-    const pets = await readData();
+    const { nombre, rut } = req.query;
+    const mascotas = await leerDatos();
 
-    if (name) {
-      const matches = pets.filter(p => p.name.toLowerCase().includes(String(name).toLowerCase()));
-      return res.json(matches);
+    if (nombre) {
+      const coincidencias = mascotas.filter(p => p.nombre.toLowerCase().includes(String(nombre).toLowerCase()));
+      return res.json(coincidencias);
     }
 
     if (rut) {
-      const matches = pets.filter(p => p.rut === String(rut) || (p.tutorRut === String(rut)));
-      return res.json(matches);
+      const coincidencias = mascotas.filter(p => p.rut === String(rut) || (p.rutTutor === String(rut)));
+      return res.json(coincidencias);
     }
 
-    return res.json(pets);
+    return res.json(mascotas);
   } catch (err) {
-    return res.status(500).json({ error: 'Error interno', details: err.message });
+    return res.status(500).json({ error: 'Error interno', detalles: err.message });
   }
 });
 
-// POST /api/pets -> { name, rut, age, species, breed, sex, tutorName, tutorRut }
+// POST /api/pets -> { nombre, rut, edad, especie, raza, sexo, nombreTutor, rutTutor }
 app.post('/api/pets', async (req, res) => {
   try {
-    const { name, rut, age, species, breed, sex, tutorName, tutorRut } = req.body || {};
+    const { nombre, rut, edad, especie, raza, sexo, nombreTutor, rutTutor } = req.body || {};
 
     // 1. Campos básicos requeridos
-    if (!name || !rut || !age || !species || !sex) {
+    if (!nombre || !rut || !edad || !especie || !sexo) {
       return res.status(400).json({ error: 'Faltan campos obligatorios (nombre, rut, edad, especie, sexo)' });
     }
 
     // 2. Validar RUT Propietario
-    if (!validateRut(rut)) {
+    if (!validarRut(rut)) {
       return res.status(400).json({ error: 'El RUT del propietario es inválido' });
     }
 
     // 3. Validar Edad y Tutor
-    const nAge = parseInt(age);
-    if (nAge < 18) {
-      if (!tutorName || !tutorRut) {
+    const nEdad = parseInt(edad);
+    if (nEdad < 18) {
+      if (!nombreTutor || !rutTutor) {
         return res.status(400).json({ error: 'Propietario menor de edad requiere Tutor Legal (Nombre y RUT)' });
       }
-      if (!validateRut(tutorRut)) {
+      if (!validarRut(rutTutor)) {
         return res.status(400).json({ error: 'El RUT del tutor legal es inválido' });
       }
     }
 
-    const pets = await readData();
+    const mascotas = await leerDatos();
 
     // 4. Crear registro con ID automático y clasificación
-    const newPet = {
+    const nuevaMascota = {
       id: Date.now().toString(),
-      name: String(name).trim(),
+      nombre: String(nombre).trim(),
       rut: String(rut).trim(),
-      age: nAge,
-      species: classifySpecies(species),
-      breed: breed ? String(breed).trim() : 'Sin especificar',
-      sex: sex,
-      tutorName: nAge < 18 ? String(tutorName).trim() : null,
-      tutorRut: nAge < 18 ? String(tutorRut).trim() : null,
-      registeredAt: new Date().toISOString()
+      edad: nEdad,
+      especie: clasificarEspecie(especie),
+      raza: raza ? String(raza).trim() : 'Sin especificar',
+      sexo: sexo,
+      nombreTutor: nEdad < 18 ? String(nombreTutor).trim() : null,
+      rutTutor: nEdad < 18 ? String(rutTutor).trim() : null,
+      registradoEn: new Date().toISOString()
     };
 
-    pets.push(newPet);
-    await writeData(pets);
-    return res.status(201).json(newPet);
+    mascotas.push(nuevaMascota);
+    await escribirDatos(mascotas);
+    return res.status(201).json(nuevaMascota);
   } catch (err) {
-    return res.status(500).json({ error: 'Error interno', details: err.message });
+    return res.status(500).json({ error: 'Error interno', detalles: err.message });
   }
 });
 
-// DELETE /api/pets?name=...  OR  /api/pets?rut=...
+// DELETE /api/pets?nombre=...  OR  /api/pets?rut=...
 app.delete('/api/pets', async (req, res) => {
   try {
-    const { name, rut } = req.query;
-    if (!name && !rut) return res.status(400).json({ error: 'Se requiere query param name o rut' });
+    const { nombre, rut } = req.query;
+    if (!nombre && !rut) return res.status(400).json({ error: 'Se requiere query param nombre o rut' });
 
-    const pets = await readData();
+    const mascotas = await leerDatos();
 
-    if (name) {
-      const idx = pets.findIndex(p => p.name.toLowerCase() === String(name).toLowerCase());
+    if (nombre) {
+      const idx = mascotas.findIndex(p => p.nombre.toLowerCase() === String(nombre).toLowerCase());
       if (idx === -1) return res.status(404).json({ error: 'Mascota no encontrada' });
-      const removed = pets.splice(idx, 1)[0];
-      await writeData(pets);
-      return res.json({ deleted: removed });
+      const eliminada = mascotas.splice(idx, 1)[0];
+      await escribirDatos(mascotas);
+      return res.json({ eliminada });
     }
 
     if (rut) {
-      const remaining = pets.filter(p => p.rut !== String(rut));
-      const deletedCount = pets.length - remaining.length;
-      if (deletedCount === 0) return res.status(404).json({ error: 'No se encontraron mascotas para ese rut' });
-      await writeData(remaining);
-      return res.json({ deletedCount });
+      const restantes = mascotas.filter(p => p.rut !== String(rut));
+      const cantidadEliminados = mascotas.length - restantes.length;
+      if (cantidadEliminados === 0) return res.status(404).json({ error: 'No se encontraron mascotas para ese rut' });
+      await escribirDatos(restantes);
+      return res.json({ cantidadEliminados });
     }
   } catch (err) {
-    console.error('SERVER_ERROR:', err);
+    console.error('ERROR_SERVIDOR:', err);
     return res.status(500).json({ error: 'Ha ocurrido un error interno en el servidor. Por favor, intente más tarde.' });
   }
 });
 
-// Error handler
+// Manejador de errores
 app.use((err, req, res, next) => {
-  console.error('UNHANDLED_ERROR:', err);
+  console.error('ERROR_NO_CONTROLADO:', err);
   res.status(500).json({ error: 'Error del sistema. Contacte al administrador.' });
 });
 
-app.listen(PORT, () => {
-  console.log(`Servidor escuchando en http://localhost:${PORT}`);
+app.listen(PUERTO, () => {
+  console.log(`Servidor escuchando en http://localhost:${PUERTO}`);
 });
