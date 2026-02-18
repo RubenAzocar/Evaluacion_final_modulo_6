@@ -37,27 +37,34 @@ async function escribirDatos(datos) {
   await fs.writeFile(RUTA_DATOS, JSON.stringify(datos, null, 2), 'utf8');
 }
 
-// Ayudante: Validar RUT chileno (módulo 11)
-function validarRut(rut) {
-  if (!rut || typeof rut !== 'string') return false;
-  let sRut = rut.replace(/\./g, '').replace(/-/g, '').toUpperCase();
-  if (sRut.length < 8) return false;
+// Ayudante: Formatear RUT (agrega puntos y guion)
+function formatearRut(rut) {
+  if (!rut || typeof rut !== 'string') return rut;
+  // Limpiar: dejar solo números y K
+  let sRut = rut.replace(/[^0-9kK]/g, '').toUpperCase();
+  if (sRut.length < 2) return rut;
 
   const cuerpo = sRut.slice(0, -1);
-  let dv = sRut.slice(-1);
+  const dv = sRut.slice(-1);
 
-  let suma = 0;
-  let multiplo = 2;
-
-  for (let i = 1; cuerpo.length - i >= 0; i++) {
-    suma += multiplo * cuerpo.charAt(cuerpo.length - i);
-    multiplo = multiplo < 7 ? multiplo + 1 : 2;
+  // Formatear cuerpo con puntos
+  let formateado = '';
+  for (let i = cuerpo.length - 1, j = 1; i >= 0; i--, j++) {
+    formateado = cuerpo.charAt(i) + formateado;
+    if (j % 3 === 0 && i !== 0) {
+      formateado = '.' + formateado;
+    }
   }
 
-  const dvEsperado = 11 - (suma % 11);
-  let dvCalc = dvEsperado === 11 ? '0' : dvEsperado === 10 ? 'K' : dvEsperado.toString();
+  return `${formateado}-${dv}`;
+}
 
-  return dvCalc === dv;
+// Ayudante: Validar RUT (solo formato básico para demostración)
+function validarRut(rut) {
+  if (!rut || typeof rut !== 'string') return false;
+  const limpio = rut.replace(/[^0-9kK]/g, '').toUpperCase();
+  // Validar longitud mínima de 8 caracteres (7 números + 1 DV) y que termine en número o K
+  return limpio.length >= 8 && limpio.length <= 9 && /^[0-9]+[0-9K]$/.test(limpio);
 }
 
 // Ayudante: Clasificar especie
@@ -79,7 +86,8 @@ app.get('/api/pets', async (req, res) => {
     }
 
     if (rut) {
-      const coincidencias = mascotas.filter(p => p.rut === String(rut) || (p.rutTutor === String(rut)));
+      const rutFormateado = formatearRut(rut);
+      const coincidencias = mascotas.filter(p => p.rut === rutFormateado || (p.rutTutor === rutFormateado));
       return res.json(coincidencias);
     }
 
@@ -121,13 +129,13 @@ app.post('/api/pets', async (req, res) => {
     const nuevaMascota = {
       id: Date.now().toString(),
       nombre: String(nombre).trim(),
-      rut: String(rut).trim(),
+      rut: formatearRut(rut),
       edad: nEdad,
       especie: clasificarEspecie(especie),
       raza: raza ? String(raza).trim() : 'Sin especificar',
       sexo: sexo,
       nombreTutor: nEdad < 18 ? String(nombreTutor).trim() : null,
-      rutTutor: nEdad < 18 ? String(rutTutor).trim() : null,
+      rutTutor: nEdad < 18 ? formatearRut(rutTutor) : null,
       registradoEn: new Date().toISOString()
     };
 
