@@ -1,0 +1,14 @@
+{
+  "name": "registro-mascotas",
+  "version": "1.0.0",
+  "description": "Servicio de registro de mascotas - Evaluación",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "Alumno",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
