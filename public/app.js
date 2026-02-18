@@ -7,7 +7,7 @@
     function showAlert(message, type = 'danger') {
         const container = $('alerts');
         if (!container) return;
-        container.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>`;
+        container.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">${escapeHtml(message)}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>`;
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -26,16 +26,16 @@
         const rows = pets.map(p => `
             <tr>
                 <td>
-                    <div style="font-size: 0.7rem; color: #94a3b8; font-family: monospace;">ID: ${p.id}</div>
-                    <span class="pet-name-chip">${p.name}</span>
+                    <div style="font-size: 0.7rem; color: #94a3b8; font-family: monospace;">ID: ${escapeHtml(p.id)}</div>
+                    <span class="pet-name-chip">${escapeHtml(p.name)}</span>
                 </td>
                 <td>
-                    <div style="font-weight: 600;">${p.species}</div>
-                    <div style="font-size: 0.8rem; color: var(--text-muted);">${p.breed} (${p.sex})</div>
+                    <div style="font-weight: 600;">${escapeHtml(p.species)}</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">${escapeHtml(p.breed)} (${escapeHtml(p.sex)})</div>
                 </td>
                 <td>
-                    <span class="rut-chip">${p.rut}</span>
-                    ${p.tutorName ? `<div style="font-size: 0.75rem; color: var(--gov-accent); margin-top: 4px;">Tutor: ${p.tutorName}</div>` : ''}
+                    <span class="rut-chip">${escapeHtml(p.rut)}</span>
+                    ${p.tutorName ? `<div style="font-size: 0.75rem; color: var(--gov-accent); margin-top: 4px;">Tutor: ${escapeHtml(p.tutorName)}</div>` : ''}
                 </td>
             </tr>
         `).join('');

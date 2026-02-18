@@ -11,6 +11,16 @@ const DATA_PATH = path.join(__dirname, 'data', 'pets.json');
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Cabeceras de seguridad básicas
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:;");
+  next();
+});
+
 // Helper: leer datos
 async function readData() {
   try {
@@ -153,14 +163,15 @@ app.delete('/api/pets', async (req, res) => {
       return res.json({ deletedCount });
     }
   } catch (err) {
-    return res.status(500).json({ error: 'Error interno', details: err.message });
+    console.error('SERVER_ERROR:', err);
+    return res.status(500).json({ error: 'Ha ocurrido un error interno en el servidor. Por favor, intente más tarde.' });
   }
 });
 
 // Error handler
 app.use((err, req, res, next) => {
-  console.error(err);
-  res.status(500).json({ error: 'Unhandled error', details: err.message });
+  console.error('UNHANDLED_ERROR:', err);
+  res.status(500).json({ error: 'Error del sistema. Contacte al administrador.' });
 });
 
 app.listen(PORT, () => {
