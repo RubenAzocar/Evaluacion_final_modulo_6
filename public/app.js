@@ -135,10 +135,12 @@
         if (!valor) return listarTodas();
         // Si contiene un guión o solo números, asumimos RUT
         if (/[\d-]/.test(valor) && valor.length > 3) {
-            buscarPorRut();
+            await buscarPorRut();
         } else {
-            buscarPorNombre();
+            await buscarPorNombre();
         }
+        // Borrar la consulta luego de realizarla
+        $('unified-search').value = '';
     }
 
     async function eliminarPorNombre() {
