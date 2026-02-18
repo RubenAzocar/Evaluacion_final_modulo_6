@@ -11,7 +11,7 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function renderizarResultados(mascotas) {
+    function renderizarResultados(mascotas, debeHacerScroll = false) {
         const el = document.getElementById('results');
         const countEl = document.getElementById('results-count');
 
@@ -56,6 +56,14 @@
                 </table>
             </div>
         `;
+
+        // Desplazar suavemente hasta los resultados solo si se solicita
+        if (debeHacerScroll) {
+            const contenedorResultados = document.querySelector('.results-wrapper');
+            if (contenedorResultados) {
+                contenedorResultados.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
     }
 
     function escaparHtml(s) {
@@ -104,7 +112,7 @@
         if (!nombre) return mostrarAlerta('Ingrese un nombre para buscar', 'warning');
         try {
             const r = await apiMascotas.get('/', { params: { nombre } });
-            renderizarResultados(r.data);
+            renderizarResultados(r.data, true);
         } catch (err) {
             mostrarAlerta(err.response?.data?.error || 'Mascota no encontrada');
         }
@@ -116,7 +124,7 @@
         if (!rut) return mostrarAlerta('Ingrese RUT para buscar', 'warning');
         try {
             const r = await apiMascotas.get('/', { params: { rut } });
-            renderizarResultados(r.data);
+            renderizarResultados(r.data, true);
         } catch (err) {
             mostrarAlerta('Error: ' + (err.response?.data?.error || err.message));
         }
