@@ -22,5 +22,17 @@
     "nombreTutor": "John Doe",
     "rutTutor": "11.213.654-7",
     "registradoEn": "2026-02-18T22:45:49.232Z"
+  },
+  {
+    "id": "1771455366480",
+    "nombre": "Suertudo",
+    "rut": "14.123.456-7",
+    "edad": 30,
+    "especie": "Gato",
+    "raza": "Gato Negro",
+    "sexo": "Macho",
+    "nombreTutor": null,
+    "rutTutor": null,
+    "registradoEn": "2026-02-18T22:56:06.480Z"
   }
 ]
