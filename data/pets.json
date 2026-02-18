@@ -1,17 +1,5 @@
 [
   {
-    "id": "1771454119544",
-    "nombre": "Suertudo",
-    "rut": "13.106.178-1",
-    "edad": 49,
-    "especie": "Gato",
-    "raza": "Sin especificar",
-    "sexo": "Macho",
-    "nombreTutor": null,
-    "rutTutor": null,
-    "registradoEn": "2026-02-18T22:35:19.544Z"
-  },
-  {
     "id": "1771454550520",
     "nombre": "Firulais",
     "rut": "12.345.678-5",
@@ -22,5 +10,17 @@
     "nombreTutor": null,
     "rutTutor": null,
     "registradoEn": "2026-02-18T22:42:30.520Z"
+  },
+  {
+    "id": "1771454749232",
+    "nombre": "Saly",
+    "rut": "15.421.123-6",
+    "edad": 17,
+    "especie": "Perro",
+    "raza": "Golden",
+    "sexo": "Hembra",
+    "nombreTutor": "John Doe",
+    "rutTutor": "11.213.654-7",
+    "registradoEn": "2026-02-18T22:45:49.232Z"
   }
 ]
